@@ -41,7 +41,7 @@ alpha-intelligence-engine
 
 ## Features
 - **Data Ingestion & Preprocessing**: Loads historical price data and generates features for analysis.
-- **Heterogeneous Stacking Ensemble**: Combines multiple machine learning models to improve predictive performance.
+- **Heterogeneous Stacking Ensemble**: Combines multiple machine learning models to improve predictive performance
 - **Predictive Analytics**: Provides insights into alpha generation and performance validation against market benchmarks.
 
 ## Contributing
