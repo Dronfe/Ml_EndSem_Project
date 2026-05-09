@@ -11,6 +11,8 @@ from sklearn.metrics import r2_score, mean_absolute_error
 import yfinance as yf
 from datetime import datetime, timedelta
 import warnings
+import os
+from pathlib import Path
 warnings.filterwarnings('ignore')
 
 # ==========================================
@@ -49,7 +51,16 @@ class AlphaIntelligenceEngine:
     """
     
     def __init__(self, filepath):
-        self.filepath = filepath
+        # Use pathlib for robust path handling
+        if filepath == '../data/NIFTY 500_day.csv':
+            # Get the directory of the current script
+            script_dir = Path(__file__).parent
+            # Go up one level and then to data directory
+            data_dir = script_dir.parent / 'data'
+            self.filepath = data_dir / 'NIFTY 500_day.csv'
+        else:
+            self.filepath = Path(filepath)
+        
         self.df = None
         self.scaler = StandardScaler()
         self.selected_stocks = []
@@ -75,7 +86,17 @@ class AlphaIntelligenceEngine:
         Converts raw prices into stationary signals for analysis.
         """
         try:
-            df = pd.read_csv(self.filepath)
+            # Convert Path to string for pandas
+            filepath_str = str(self.filepath)
+            
+            # Check if file exists
+            if not self.filepath.exists():
+                st.error(f"Data file not found: {filepath_str}")
+                st.error(f"Current working directory: {os.getcwd()}")
+                st.error(f"Script directory: {Path(__file__).parent}")
+                return None
+            
+            df = pd.read_csv(filepath_str)
             df['date'] = pd.to_datetime(df['Date'])  # Handle case-insensitive column names
             df['close'] = df['Close']
             df = df.sort_values('date').set_index('date')
@@ -99,9 +120,12 @@ class AlphaIntelligenceEngine:
             df['Target_Alpha'] = df['Returns'].shift(-1)
             
             self.df = df.dropna()
+            st.success(f"Successfully loaded {len(self.df)} data points")
             return self.df
         except Exception as e:
             st.error(f"Error loading file: {e}")
+            st.error(f"File path: {str(self.filepath)}")
+            st.error(f"File exists: {self.filepath.exists()}")
             return None
 
     def train_ensemble(self):
